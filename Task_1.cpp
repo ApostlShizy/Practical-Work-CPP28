@@ -16,7 +16,9 @@ void swimmer(int speed, std::string name) {
         if (distanceCovered > 100) {
             distanceCovered = 100;
         }
+        accsessResults.lock();
         std::cout << "\nSwimmer " << name << " cover " << distanceCovered << " meters" << std::endl;
+        accsessResults.unlock();
     }
     accsessResults.lock();
     results.insert(std::pair<int, std::string>(second, name));
@@ -49,12 +51,12 @@ int main() {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
         }
-        for (int i = 0; i < count; ++i) {
-            delete swimmers[i];
-        }        
+        
+        delete [] swimmers;
+
     }
     accsessResults.lock();
-    std::cout << "\nResul is : ";
+    std::cout << "\nResul is : " << std::endl;
     for (std::multimap<int, std::string >::iterator iter = results.begin(); iter != results.end(); ++iter) {
         std::cout << "Name is : " << iter->second << " Result is : " << iter->first << std::endl;
     }

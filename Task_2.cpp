@@ -46,8 +46,8 @@ int main() {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
-    for (int i = 0; i < 3; ++i) {
-        delete trains[i];
-    }
+    
+    delete [] trains;
+   
 }
 

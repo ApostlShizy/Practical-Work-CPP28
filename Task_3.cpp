@@ -44,8 +44,6 @@ int main() {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
-    std::cout << "\nAll work done for this day!" << std::endl;
-    for (int i = 0; i < count; ++i) {
-        delete restaurantOrders[i];
-    }   
-}
+    std::cout << "\nAll work done for this day!" << std::endl;    
+    delete [] restaurantOrders;
+  }
