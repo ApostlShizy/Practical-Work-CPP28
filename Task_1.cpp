@@ -50,10 +50,8 @@ int main() {
             else {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
-        }
-        
+        }        
         delete [] swimmers;
-
     }
     accsessResults.lock();
     std::cout << "\nResul is : " << std::endl;
