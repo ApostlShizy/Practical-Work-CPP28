@@ -2,11 +2,12 @@
 #include <thread>
 #include <mutex>
 #include <map>
+#include <vector>
 
 std::multimap<int, std::string> results;
 std::mutex accsessResults;
 
-void swimmer(int speed, std::string name) {    
+void swimmer(int speed, std::string name) {
     int distanceCovered = 0;
     int second = 0;
     while (100 != distanceCovered) {
@@ -16,13 +17,11 @@ void swimmer(int speed, std::string name) {
         if (distanceCovered > 100) {
             distanceCovered = 100;
         }
-        accsessResults.lock();
-        std::cout << "\nSwimmer " << name << " cover " << distanceCovered << " meters" << std::endl;
-        accsessResults.unlock();
+        std::lock_guard<std::mutex> guard (accsessResults);
+        std::cout << "\nSwimmer " << name << " cover " << distanceCovered << " meters" << std::endl;        
     }
-    accsessResults.lock();
-    results.insert(std::pair<int, std::string>(second, name));
-    accsessResults.unlock();
+    std::lock_guard<std::mutex> guard(accsessResults);
+    results.insert(std::pair<int, std::string>(second, name));    
 }
 
 int main() {
@@ -38,25 +37,23 @@ int main() {
             speed[i] = (temp_speed);
             names[i] = (temp_str);
         }
-        std::thread** swimmers = new std::thread * [count];
+        std::vector<std::thread> swimmers;
         for (int i = 0; i < count; ++i) {
-            swimmers[i] = new std::thread(swimmer, speed[i], names[i]);
+            swimmers.push_back (std::thread(swimmer, speed[i], names[i]));
         }
         for (int i = 0; i < count;) {
-            if (swimmers[i]->joinable()) {
-                swimmers[i]->join();
+            if (swimmers[i].joinable()) {
+                swimmers[i].join();
                 ++i;
             }
             else {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
-        }        
-        delete [] swimmers;
+        }                
     }
-    accsessResults.lock();
+    std::lock_guard<std::mutex> guard(accsessResults);
     std::cout << "\nResul is : " << std::endl;
     for (std::multimap<int, std::string >::iterator iter = results.begin(); iter != results.end(); ++iter) {
         std::cout << "Name is : " << iter->second << " Result is : " << iter->first << std::endl;
-    }
-    accsessResults.unlock();        
+    }       
 }

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
+#include <vector>
 
 std::mutex depotAccess;
 bool depotStatus = false;
@@ -11,7 +12,7 @@ void trainTravel(char trainName, int departTime) {
         std::cout << "\n\nTrain " << trainName << " wait for free place " << std::endl;
         std::cout << "\nEnter : ";
     }
-    depotAccess.lock();
+    std::lock_guard<std::mutex> guard(depotAccess);
     depotStatus = true;
     std::cout << "\nTrain " << trainName << " deart on station. Travel time" << departTime << std::endl;
     std::string temp;
@@ -20,8 +21,7 @@ void trainTravel(char trainName, int departTime) {
         std::cin >> temp;
     }
     std::cout << "\nTrain " << trainName << " left the station" << std::endl;
-    depotStatus = false;
-    depotAccess.unlock();     
+    depotStatus = false;       
 }
 
 int main() {
@@ -33,19 +33,17 @@ int main() {
         std::cout << "\nEnter travel time for train " << trainName[i] << " : ";
         std::cin >> departTime[i];
     }
-    std::thread** trains = new std::thread * [3];
+    std::vector<std::thread> trains;
     for (int i = 0; i < 3; ++i) {
-        trains[i] = new std::thread(trainTravel, trainName[i], departTime[i]);
+        trains.push_back(std::thread(trainTravel, trainName[i], departTime[i]));
     }
     for (int i = 0; i < 3;) {
-        if (trains[i]->joinable()) {
-            trains[i]->join();
+        if (trains[i].joinable()) {
+            trains[i].join();
             ++i;
         }
         else {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-    }    
-    delete [] trains;   
+    } 
 }
-
